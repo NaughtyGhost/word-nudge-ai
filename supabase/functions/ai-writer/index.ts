@@ -54,6 +54,11 @@ serve(async (req) => {
         userPrompt = `Summarize this chapter:\n\n${text}`;
         break;
       
+      case 'chat':
+        systemPrompt = 'You are a creative writing coach and novel development assistant. Help the author with plot development, character arcs, world-building, pacing, themes, and any other aspect of their novel. Be encouraging, insightful, and ask thoughtful questions to help them develop their story.';
+        userPrompt = prompt || text || 'Hello!';
+        break;
+      
       default:
         throw new Error('Invalid action');
     }

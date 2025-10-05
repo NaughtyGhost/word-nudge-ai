@@ -14,6 +14,7 @@ import {
   Lightbulb,
   MessageSquare
 } from "lucide-react";
+import { ChatPanel } from "@/components/ChatPanel";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +44,7 @@ const Index = () => {
   const [content, setContent] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [scenePrompt, setScenePrompt] = useState('');
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Load content when chapter changes
@@ -202,6 +204,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      
       {/* Sidebar */}
       <aside className="w-64 border-r border-border bg-card p-4 space-y-4">
         <div className="flex items-center gap-2 mb-6">
@@ -309,6 +313,16 @@ const Index = () => {
           >
             <FileText className="h-4 w-4 mr-2" />
             Summarize
+          </Button>
+
+          <Button
+            onClick={() => setIsChatOpen(true)}
+            variant="secondary"
+            size="sm"
+            className="ml-auto"
+          >
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Chat with AI
           </Button>
 
           {isAiLoading && (
