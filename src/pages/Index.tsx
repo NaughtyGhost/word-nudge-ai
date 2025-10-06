@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { 
   BookOpen, 
   Sparkles, 
@@ -55,7 +55,6 @@ const Index = () => {
   const [scenePrompt, setScenePrompt] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Check auth and load manuscript
   useEffect(() => {
@@ -153,16 +152,10 @@ const Index = () => {
   const callAI = async (action: string, additionalData?: any) => {
     setIsAiLoading(true);
     try {
-      const selection = textareaRef.current?.value.substring(
-        textareaRef.current.selectionStart,
-        textareaRef.current.selectionEnd
-      );
-
-      const contextStart = Math.max(0, (textareaRef.current?.selectionStart || 0) - 500);
-      const context = textareaRef.current?.value.substring(
-        contextStart,
-        textareaRef.current?.selectionStart
-      );
+      // Get plain text from HTML content for AI processing
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+      const plainText = tempDiv.textContent || tempDiv.innerText || '';
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-writer`,
@@ -174,8 +167,8 @@ const Index = () => {
           },
           body: JSON.stringify({
             action,
-            text: selection || content,
-            context: context || content.slice(-500),
+            text: plainText,
+            context: plainText.slice(-500),
             ...additionalData
           }),
         }
@@ -200,24 +193,12 @@ const Index = () => {
   const handleAutocomplete = async () => {
     const result = await callAI('autocomplete');
     if (result) {
-      const cursorPos = textareaRef.current?.selectionStart || content.length;
-      const newContent = content.slice(0, cursorPos) + ' ' + result + content.slice(cursorPos);
-      setContent(newContent);
+      setContent(content + '<p>' + result + '</p>');
       toast.success('AI continued your story!');
     }
   };
 
   const handleRewrite = async (type: string) => {
-    const selection = textareaRef.current?.value.substring(
-      textareaRef.current.selectionStart,
-      textareaRef.current.selectionEnd
-    );
-
-    if (!selection) {
-      toast.error('Please select text to rewrite');
-      return;
-    }
-
     let action = '';
     switch (type) {
       case 'suspenseful':
@@ -233,10 +214,7 @@ const Index = () => {
 
     const result = await callAI(action);
     if (result) {
-      const start = textareaRef.current!.selectionStart;
-      const end = textareaRef.current!.selectionEnd;
-      const newContent = content.slice(0, start) + result + content.slice(end);
-      setContent(newContent);
+      setContent('<p>' + result + '</p>');
       toast.success('Text rewritten!');
     }
   };
@@ -249,9 +227,7 @@ const Index = () => {
 
     const result = await callAI('generate-scene', { prompt: scenePrompt });
     if (result) {
-      const cursorPos = textareaRef.current?.selectionStart || content.length;
-      const newContent = content.slice(0, cursorPos) + '\n\n' + result + '\n\n' + content.slice(cursorPos);
-      setContent(newContent);
+      setContent(content + '<p>' + result + '</p>');
       setScenePrompt('');
       toast.success('Scene generated!');
     }
@@ -442,13 +418,11 @@ const Index = () => {
 
         {/* Editor Area */}
         <div className="flex-1 px-4 pb-4">
-          <Card className="h-full p-8 bg-editor-bg border-border/50">
-            <Textarea
-              ref={textareaRef}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+          <Card className="h-full p-4 bg-editor-bg border-border/50">
+            <RichTextEditor
+              content={content}
+              onChange={setContent}
               placeholder="Begin your story..."
-              className="editor-prose w-full h-full resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50"
             />
           </Card>
         </div>

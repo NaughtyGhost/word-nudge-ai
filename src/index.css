@@ -95,6 +95,51 @@ All colors MUST be HSL.
     line-height: 1.8;
   }
 
+  .editor-prose h1 {
+    @apply text-3xl font-bold mb-4 mt-6;
+  }
+
+  .editor-prose h2 {
+    @apply text-2xl font-bold mb-3 mt-5;
+  }
+
+  .editor-prose h3 {
+    @apply text-xl font-semibold mb-2 mt-4;
+  }
+
+  .editor-prose p {
+    @apply mb-4;
+  }
+
+  .editor-prose ul,
+  .editor-prose ol {
+    @apply mb-4 pl-6;
+  }
+
+  .editor-prose ul {
+    @apply list-disc;
+  }
+
+  .editor-prose ol {
+    @apply list-decimal;
+  }
+
+  .editor-prose blockquote {
+    @apply border-l-4 border-primary/50 pl-4 italic my-4;
+  }
+
+  .editor-prose strong {
+    @apply font-bold;
+  }
+
+  .editor-prose em {
+    @apply italic;
+  }
+
+  .editor-prose u {
+    @apply underline;
+  }
+
   .glass-panel {
     @apply bg-[hsl(var(--toolbar-bg))] backdrop-blur-xl border border-border/50 rounded-xl;
   }
