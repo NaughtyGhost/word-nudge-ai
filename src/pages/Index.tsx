@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
   BookOpen, 
@@ -12,7 +14,9 @@ import {
   Plus,
   ChevronRight,
   Lightbulb,
-  MessageSquare
+  MessageSquare,
+  ArrowLeft,
+  Save
 } from "lucide-react";
 import { ChatPanel } from "@/components/ChatPanel";
 import {
@@ -29,6 +33,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { User } from "@supabase/supabase-js";
 
 interface Chapter {
   id: string;
@@ -37,6 +42,10 @@ interface Chapter {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { manuscriptId } = useParams();
+  const [user, setUser] = useState<User | null>(null);
+  const [manuscript, setManuscript] = useState<any>(null);
   const [chapters, setChapters] = useState<Chapter[]>([
     { id: '1', title: 'Chapter 1', content: '' }
   ]);
@@ -45,7 +54,52 @@ const Index = () => {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [scenePrompt, setScenePrompt] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Check auth and load manuscript
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+        if (manuscriptId) {
+          loadManuscript();
+        }
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, manuscriptId]);
+
+  const loadManuscript = async () => {
+    if (!manuscriptId) return;
+
+    const { data, error } = await supabase
+      .from("manuscripts")
+      .select("*")
+      .eq("id", manuscriptId)
+      .single();
+
+    if (error) {
+      toast.error("Failed to load manuscript");
+      navigate("/");
+    } else {
+      setManuscript(data);
+      if (data.content && typeof data.content === 'object' && 'chapters' in data.content) {
+        setChapters(data.content.chapters as unknown as Chapter[]);
+      }
+    }
+  };
 
   // Load content when chapter changes
   useEffect(() => {
@@ -66,6 +120,35 @@ const Index = () => {
     }, 1000);
     return () => clearTimeout(timer);
   }, [content, activeChapter]);
+
+  // Auto-save to database
+  useEffect(() => {
+    if (!manuscript) return;
+
+    const timer = setTimeout(() => {
+      saveManuscript();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [chapters, manuscript]);
+
+  const saveManuscript = async () => {
+    if (!manuscriptId || saving) return;
+
+    setSaving(true);
+    const { error } = await supabase
+      .from("manuscripts")
+      .update({
+        content: { chapters } as any,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", manuscriptId);
+
+    if (error) {
+      toast.error("Failed to save");
+    }
+    setSaving(false);
+  };
 
   const callAI = async (action: string, additionalData?: any) => {
     setIsAiLoading(true);
@@ -202,6 +285,17 @@ const Index = () => {
     setActiveChapter(newId);
   };
 
+  if (!manuscript) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <BookOpen className="w-12 h-12 text-primary animate-pulse mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading manuscript...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex">
       <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
@@ -209,9 +303,22 @@ const Index = () => {
       {/* Sidebar */}
       <aside className="w-64 border-r border-border bg-card p-4 space-y-4">
         <div className="flex items-center gap-2 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/")}
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
           <BookOpen className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold">NovelForge</h1>
+          <h1 className="text-lg font-bold truncate">{manuscript.title}</h1>
         </div>
+
+        {saving && (
+          <div className="text-xs text-muted-foreground flex items-center gap-1 px-2">
+            <Save className="w-3 h-3 animate-pulse" /> Saving...
+          </div>
+        )}
 
         <Button onClick={addChapter} className="w-full" variant="outline">
           <Plus className="h-4 w-4 mr-2" />
