@@ -16,9 +16,12 @@ import {
   Lightbulb,
   MessageSquare,
   ArrowLeft,
-  Save
+  Save,
+  PenTool
 } from "lucide-react";
 import { ChatPanel } from "@/components/ChatPanel";
+import { EditorPanel } from "@/components/EditorPanel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -323,109 +326,130 @@ const Index = () => {
 
       {/* Main Editor */}
       <main className="flex-1 flex flex-col">
-        {/* Toolbar */}
-        <div className="glass-panel m-4 p-3 flex items-center gap-2 flex-wrap">
-          <Button
-            onClick={handleAutocomplete}
-            disabled={isAiLoading}
-            variant="default"
-            size="sm"
-            className="ai-glow"
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            Continue Writing
-          </Button>
+        <Tabs defaultValue="write" className="flex-1 flex flex-col">
+          <div className="glass-panel m-4 mb-0 p-2">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="write" className="flex items-center gap-2">
+                <PenTool className="h-4 w-4" />
+                Write
+              </TabsTrigger>
+              <TabsTrigger value="editor" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Editor
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="sm" disabled={isAiLoading}>
-                <Wand2 className="h-4 w-4 mr-2" />
-                Rewrite
+          <TabsContent value="write" className="flex-1 flex flex-col mt-0">
+            {/* Toolbar */}
+            <div className="glass-panel m-4 p-3 flex items-center gap-2 flex-wrap">
+              <Button
+                onClick={handleAutocomplete}
+                disabled={isAiLoading}
+                variant="default"
+                size="sm"
+                className="ai-glow"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Continue Writing
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => handleRewrite('suspenseful')}>
-                Make More Suspenseful
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleRewrite('show')}>
-                Show, Don't Tell
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleRewrite('dialogue')}>
-                Improve Dialogue
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="secondary" size="sm" disabled={isAiLoading}>
-                <Lightbulb className="h-4 w-4 mr-2" />
-                Generate Scene
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="sm" disabled={isAiLoading}>
+                    <Wand2 className="h-4 w-4 mr-2" />
+                    Rewrite
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleRewrite('suspenseful')}>
+                    Make More Suspenseful
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleRewrite('show')}>
+                    Show, Don't Tell
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleRewrite('dialogue')}>
+                    Improve Dialogue
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="secondary" size="sm" disabled={isAiLoading}>
+                    <Lightbulb className="h-4 w-4 mr-2" />
+                    Generate Scene
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Generate Scene</DialogTitle>
+                    <DialogDescription>
+                      Describe the scene you want to create
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="e.g., A rainy night in a dystopian city..."
+                      value={scenePrompt}
+                      onChange={(e) => setScenePrompt(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleGenerateScene()}
+                    />
+                    <Button 
+                      onClick={handleGenerateScene} 
+                      disabled={isAiLoading}
+                      className="w-full"
+                    >
+                      Generate
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Button
+                onClick={handleSummarize}
+                disabled={isAiLoading}
+                variant="secondary"
+                size="sm"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Summarize
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Generate Scene</DialogTitle>
-                <DialogDescription>
-                  Describe the scene you want to create
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <Input
-                  placeholder="e.g., A rainy night in a dystopian city..."
-                  value={scenePrompt}
-                  onChange={(e) => setScenePrompt(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleGenerateScene()}
-                />
-                <Button 
-                  onClick={handleGenerateScene} 
-                  disabled={isAiLoading}
-                  className="w-full"
-                >
-                  Generate
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
 
-          <Button
-            onClick={handleSummarize}
-            disabled={isAiLoading}
-            variant="secondary"
-            size="sm"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Summarize
-          </Button>
+              <Button
+                onClick={() => setIsChatOpen(true)}
+                variant="secondary"
+                size="sm"
+                className="ml-auto"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Chat with AI
+              </Button>
 
-          <Button
-            onClick={() => setIsChatOpen(true)}
-            variant="secondary"
-            size="sm"
-            className="ml-auto"
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Chat with AI
-          </Button>
-
-          {isAiLoading && (
-            <div className="ml-auto flex items-center gap-2 text-sm text-primary">
-              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              AI thinking...
+              {isAiLoading && (
+                <div className="ml-auto flex items-center gap-2 text-sm text-primary">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  AI thinking...
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Editor Area */}
-        <div className="flex-1 px-4 pb-4">
-          <Card className="h-full p-4 bg-editor-bg border-border/50">
-            <RichTextEditor
-              content={content}
-              onChange={setContent}
-              placeholder="Begin your story..."
-            />
-          </Card>
-        </div>
+            {/* Editor Area */}
+            <div className="flex-1 px-4 pb-4">
+              <Card className="h-full p-4 bg-editor-bg border-border/50">
+                <RichTextEditor
+                  content={content}
+                  onChange={setContent}
+                  placeholder="Begin your story..."
+                />
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="editor" className="flex-1 px-4 pb-4 mt-0">
+            <EditorPanel chapters={chapters} />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

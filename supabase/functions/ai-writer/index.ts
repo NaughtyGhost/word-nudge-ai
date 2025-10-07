@@ -23,44 +23,71 @@ serve(async (req) => {
     let systemPrompt = '';
     let userPrompt = '';
 
-    switch (action) {
-      case 'autocomplete':
-        systemPrompt = 'You are a creative writing assistant for novelists. Continue the story naturally in the author\'s style. Write 1-2 sentences that flow seamlessly from the context.';
-        userPrompt = `Context:\n${context}\n\nContinue writing from here naturally:`;
-        break;
+    // Editorial analysis actions
+    if (action.startsWith('editor-')) {
+      const analysisType = action.replace('editor-', '');
       
-      case 'rewrite-suspenseful':
-        systemPrompt = 'You are a creative writing expert. Rewrite the given text to be more suspenseful, adding tension and intrigue.';
-        userPrompt = `Rewrite this to be more suspenseful:\n\n${text}`;
-        break;
-      
-      case 'rewrite-show':
-        systemPrompt = 'You are a creative writing expert. Rewrite the given text using "show, don\'t tell" technique - use sensory details and actions instead of stating emotions directly.';
-        userPrompt = `Rewrite this using "show, don't tell":\n\n${text}`;
-        break;
-      
-      case 'rewrite-dialogue':
-        systemPrompt = 'You are a creative writing expert. Rewrite the dialogue to be more natural, authentic, and character-driven.';
-        userPrompt = `Make this dialogue more natural:\n\n${text}`;
-        break;
-      
-      case 'generate-scene':
-        systemPrompt = 'You are a creative writing assistant. Generate vivid, atmospheric scene descriptions based on prompts. Write 2-3 paragraphs.';
-        userPrompt = prompt || 'Generate a vivid scene description';
-        break;
-      
-      case 'summarize':
-        systemPrompt = 'You are a writing assistant. Provide a concise, clear summary of the chapter highlighting key plot points and character development.';
-        userPrompt = `Summarize this chapter:\n\n${text}`;
-        break;
-      
-      case 'chat':
-        systemPrompt = 'You are a creative writing coach and novel development assistant. Help the author with plot development, character arcs, world-building, pacing, themes, and any other aspect of their novel. Be encouraging, insightful, and ask thoughtful questions to help them develop their story.';
-        userPrompt = prompt || text || 'Hello!';
-        break;
-      
-      default:
-        throw new Error('Invalid action');
+      switch (analysisType) {
+        case 'plot':
+          systemPrompt = 'You are an experienced book editor specializing in plot structure and narrative consistency. Provide detailed, constructive feedback on plot elements, pacing, and story structure.';
+          userPrompt = `Please analyze the plot of this manuscript. Focus on:\n- Plot consistency and logic\n- Story structure and arc\n- Pacing and tension\n- Plot holes or inconsistencies\n- Narrative flow\n\nManuscript:\n${text}`;
+          break;
+        case 'characters':
+          systemPrompt = 'You are an experienced book editor specializing in character development. Provide detailed, constructive feedback on character arcs, consistency, and depth.';
+          userPrompt = `Please analyze the characters in this manuscript. Focus on:\n- Character development and arcs\n- Character consistency\n- Dialogue authenticity\n- Character motivations\n- Relationships between characters\n\nManuscript:\n${text}`;
+          break;
+        case 'pacing':
+          systemPrompt = 'You are an experienced book editor specializing in narrative pacing and flow. Provide detailed, constructive feedback on pacing, rhythm, and reader engagement.';
+          userPrompt = `Please analyze the pacing of this manuscript. Focus on:\n- Overall pacing and rhythm\n- Scene transitions\n- Tension and release\n- Reader engagement\n- Areas that feel rushed or slow\n\nManuscript:\n${text}`;
+          break;
+        case 'overall':
+          systemPrompt = 'You are an experienced book editor providing comprehensive editorial feedback. Provide detailed, constructive feedback covering all aspects of the manuscript.';
+          userPrompt = `Please provide comprehensive editorial feedback on this manuscript. Cover:\n- Strengths and weaknesses\n- Plot and structure\n- Character development\n- Writing style and voice\n- Pacing and flow\n- Suggestions for improvement\n\nManuscript:\n${text}`;
+          break;
+        default:
+          throw new Error('Invalid editor action');
+      }
+    } else {
+      // Writing assistant actions
+      switch (action) {
+        case 'autocomplete':
+          systemPrompt = 'You are a creative writing assistant for novelists. Continue the story naturally in the author\'s style. Write 1-2 sentences that flow seamlessly from the context.';
+          userPrompt = `Context:\n${context}\n\nContinue writing from here naturally:`;
+          break;
+        
+        case 'rewrite-suspenseful':
+          systemPrompt = 'You are a creative writing expert. Rewrite the given text to be more suspenseful, adding tension and intrigue.';
+          userPrompt = `Rewrite this to be more suspenseful:\n\n${text}`;
+          break;
+        
+        case 'rewrite-show':
+          systemPrompt = 'You are a creative writing expert. Rewrite the given text using "show, don\'t tell" technique - use sensory details and actions instead of stating emotions directly.';
+          userPrompt = `Rewrite this using "show, don't tell":\n\n${text}`;
+          break;
+        
+        case 'rewrite-dialogue':
+          systemPrompt = 'You are a creative writing expert. Rewrite the dialogue to be more natural, authentic, and character-driven.';
+          userPrompt = `Make this dialogue more natural:\n\n${text}`;
+          break;
+        
+        case 'generate-scene':
+          systemPrompt = 'You are a creative writing assistant. Generate vivid, atmospheric scene descriptions based on prompts. Write 2-3 paragraphs.';
+          userPrompt = prompt || 'Generate a vivid scene description';
+          break;
+        
+        case 'summarize':
+          systemPrompt = 'You are a writing assistant. Provide a concise, clear summary of the chapter highlighting key plot points and character development.';
+          userPrompt = `Summarize this chapter:\n\n${text}`;
+          break;
+        
+        case 'chat':
+          systemPrompt = 'You are a creative writing coach and novel development assistant. Help the author with plot development, character arcs, world-building, pacing, themes, and any other aspect of their novel. Be encouraging, insightful, and ask thoughtful questions to help them develop their story.';
+          userPrompt = prompt || text || 'Hello!';
+          break;
+        
+        default:
+          throw new Error('Invalid action');
+      }
     }
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
