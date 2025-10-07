@@ -14,6 +14,94 @@ export type Database = {
   }
   public: {
     Tables: {
+      chapter_versions: {
+        Row: {
+          chapter_id: string
+          content: string
+          created_at: string
+          id: string
+          manuscript_id: string
+          title: string
+          version_number: number
+        }
+        Insert: {
+          chapter_id: string
+          content: string
+          created_at?: string
+          id?: string
+          manuscript_id: string
+          title: string
+          version_number: number
+        }
+        Update: {
+          chapter_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          manuscript_id?: string
+          title?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_versions_manuscript_id_fkey"
+            columns: ["manuscript_id"]
+            isOneToOne: false
+            referencedRelation: "manuscripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      characters: {
+        Row: {
+          background: string | null
+          created_at: string
+          description: string | null
+          id: string
+          manuscript_id: string
+          name: string
+          notes: string | null
+          personality: string | null
+          relationships: Json | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          background?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          manuscript_id: string
+          name: string
+          notes?: string | null
+          personality?: string | null
+          relationships?: Json | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          manuscript_id?: string
+          name?: string
+          notes?: string | null
+          personality?: string | null
+          relationships?: Json | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "characters_manuscript_id_fkey"
+            columns: ["manuscript_id"]
+            isOneToOne: false
+            referencedRelation: "manuscripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       manuscripts: {
         Row: {
           content: Json | null
