@@ -27,6 +27,9 @@ import { ChatPanel } from "@/components/ChatPanel";
 import { EditorPanel } from "@/components/EditorPanel";
 import { WordCountStats } from "@/components/WordCountStats";
 import { SortableChapter } from "@/components/SortableChapter";
+import { CharacterDatabase } from "@/components/CharacterDatabase";
+import { ChapterMetadata } from "@/components/ChapterMetadata";
+import { VersionHistory } from "@/components/VersionHistory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -61,10 +64,17 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import type { User } from "@supabase/supabase-js";
 
+interface ChapterMetadata {
+  notes?: string;
+  tags?: string[];
+  status?: "draft" | "revision" | "final";
+}
+
 interface Chapter {
   id: string;
   title: string;
   content: string;
+  metadata?: ChapterMetadata;
 }
 
 const Index = () => {
@@ -83,6 +93,7 @@ const Index = () => {
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [showMetadata, setShowMetadata] = useState(false);
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -183,6 +194,56 @@ const Index = () => {
       toast.error("Failed to save");
     }
     setSaving(false);
+  };
+
+  const saveChapterVersion = async () => {
+    const activeChapterData = chapters.find(c => c.id === activeChapter);
+    if (!activeChapterData || !manuscriptId) return;
+
+    try {
+      const { data: versions } = await supabase
+        .from("chapter_versions")
+        .select("version_number")
+        .eq("manuscript_id", manuscriptId)
+        .eq("chapter_id", activeChapter)
+        .order("version_number", { ascending: false })
+        .limit(1);
+
+      const nextVersion = versions && versions.length > 0 ? versions[0].version_number + 1 : 1;
+
+      const { error } = await supabase
+        .from("chapter_versions")
+        .insert({
+          manuscript_id: manuscriptId,
+          chapter_id: activeChapter,
+          title: activeChapterData.title,
+          content: activeChapterData.content,
+          version_number: nextVersion
+        });
+
+      if (error) throw error;
+      toast.success(`Version ${nextVersion} saved!`);
+    } catch (error) {
+      console.error("Error saving version:", error);
+      toast.error("Failed to save version");
+    }
+  };
+
+  const restoreVersion = (restoredContent: string) => {
+    setContent(restoredContent);
+    setChapters(prev =>
+      prev.map(ch =>
+        ch.id === activeChapter ? { ...ch, content: restoredContent } : ch
+      )
+    );
+  };
+
+  const updateChapterMetadata = (metadata: ChapterMetadata) => {
+    setChapters(prev =>
+      prev.map(ch =>
+        ch.id === activeChapter ? { ...ch, metadata } : ch
+      )
+    );
   };
 
   const callAI = async (action: string, additionalData?: any) => {
@@ -398,7 +459,7 @@ const Index = () => {
       <main className="flex-1 flex flex-col">
         <Tabs defaultValue="write" className="flex-1 flex flex-col">
           <div className="glass-panel m-4 mb-0 p-2">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsList className="grid w-full max-w-2xl grid-cols-3">
               <TabsTrigger value="write" className="flex items-center gap-2">
                 <PenTool className="h-4 w-4" />
                 Write
@@ -406,6 +467,10 @@ const Index = () => {
               <TabsTrigger value="editor" className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
                 Editor
+              </TabsTrigger>
+              <TabsTrigger value="characters" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Characters
               </TabsTrigger>
             </TabsList>
           </div>
@@ -488,6 +553,30 @@ const Index = () => {
               </Button>
 
               <Button
+                onClick={saveChapterVersion}
+                variant="outline"
+                size="sm"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Version
+              </Button>
+
+              <VersionHistory
+                manuscriptId={manuscriptId || ""}
+                chapterId={activeChapter}
+                currentTitle={chapters.find(c => c.id === activeChapter)?.title || ""}
+                onRestore={restoreVersion}
+              />
+
+              <Button
+                onClick={() => setShowMetadata(!showMetadata)}
+                variant="outline"
+                size="sm"
+              >
+                {showMetadata ? "Hide" : "Show"} Metadata
+              </Button>
+
+              <Button
                 onClick={() => setIsChatOpen(true)}
                 variant="secondary"
                 size="sm"
@@ -519,19 +608,33 @@ const Index = () => {
             </div>
 
             {/* Editor Area */}
-            <div className="flex-1 px-4 pb-4">
-              <Card className="h-full p-4 bg-editor-bg border-border/50">
+            <div className="flex-1 px-4 pb-4 flex gap-4">
+              <Card className="flex-1 p-4 bg-editor-bg border-border/50">
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
                   placeholder="Begin your story..."
                 />
               </Card>
+              {showMetadata && (
+                <div className="w-80">
+                  <ChapterMetadata
+                    metadata={chapters.find(c => c.id === activeChapter)?.metadata || {}}
+                    onChange={updateChapterMetadata}
+                  />
+                </div>
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="editor" className="flex-1 px-4 pb-4 mt-0">
             <EditorPanel chapters={chapters} />
+          </TabsContent>
+
+          <TabsContent value="characters" className="flex-1 px-4 pb-4 mt-0 overflow-y-auto">
+            <Card className="p-6">
+              <CharacterDatabase manuscriptId={manuscriptId || ""} />
+            </Card>
           </TabsContent>
         </Tabs>
       </main>

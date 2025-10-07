@@ -85,6 +85,16 @@ serve(async (req) => {
           userPrompt = prompt || text || 'Hello!';
           break;
         
+        case 'generate-character':
+          systemPrompt = 'You are a creative writing assistant specializing in character development. Generate detailed, nuanced character profiles that feel authentic and three-dimensional.';
+          userPrompt = `Create a detailed character profile for: ${text}\n\nContext: ${context}\n\nProvide a JSON response with the following fields:
+- personality: A detailed description of their traits, quirks, and behavioral patterns
+- background: Their history, key life events, and how it shaped them
+- description: Physical appearance and how they present themselves
+
+Make the character feel real and multi-dimensional.`;
+          break;
+        
         default:
           throw new Error('Invalid action');
       }
