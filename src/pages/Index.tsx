@@ -17,10 +17,16 @@ import {
   MessageSquare,
   ArrowLeft,
   Save,
-  PenTool
+  PenTool,
+  Search,
+  Maximize2,
+  Minimize2,
+  GripVertical
 } from "lucide-react";
 import { ChatPanel } from "@/components/ChatPanel";
 import { EditorPanel } from "@/components/EditorPanel";
+import { WordCountStats } from "@/components/WordCountStats";
+import { SortableChapter } from "@/components/SortableChapter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -36,6 +42,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { User } from "@supabase/supabase-js";
 
 interface Chapter {
@@ -58,6 +81,16 @@ const Index = () => {
   const [scenePrompt, setScenePrompt] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isFocusMode, setIsFocusMode] = useState(false);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Check auth and load manuscript
   useEffect(() => {
@@ -264,6 +297,24 @@ const Index = () => {
     setActiveChapter(newId);
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setChapters((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  // Filter chapters based on search
+  const filteredChapters = chapters.filter(chapter =>
+    chapter.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chapter.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (!manuscript) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -280,49 +331,68 @@ const Index = () => {
       <ChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
       
       {/* Sidebar */}
-      <aside className="w-64 border-r border-border bg-card p-4 space-y-4">
-        <div className="flex items-center gap-2 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <BookOpen className="h-6 w-6 text-primary" />
-          <h1 className="text-lg font-bold truncate">{manuscript.title}</h1>
-        </div>
-
-        {saving && (
-          <div className="text-xs text-muted-foreground flex items-center gap-1 px-2">
-            <Save className="w-3 h-3 animate-pulse" /> Saving...
-          </div>
-        )}
-
-        <Button onClick={addChapter} className="w-full" variant="outline">
-          <Plus className="h-4 w-4 mr-2" />
-          New Chapter
-        </Button>
-
-        <div className="space-y-1">
-          {chapters.map(chapter => (
-            <button
-              key={chapter.id}
-              onClick={() => setActiveChapter(chapter.id)}
-              className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between group ${
-                activeChapter === chapter.id 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'hover:bg-secondary text-foreground'
-              }`}
+      {!isFocusMode && (
+        <aside className="w-64 border-r border-border bg-card p-4 space-y-4">
+          <div className="flex items-center gap-2 mb-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
             >
-              <span className="truncate">{chapter.title}</span>
-              <ChevronRight className={`h-4 w-4 transition-transform ${
-                activeChapter === chapter.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'
-              }`} />
-            </button>
-          ))}
-        </div>
-      </aside>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <BookOpen className="h-6 w-6 text-primary" />
+            <h1 className="text-lg font-bold truncate">{manuscript.title}</h1>
+          </div>
+
+          {saving && (
+            <div className="text-xs text-muted-foreground flex items-center gap-1 px-2">
+              <Save className="w-3 h-3 animate-pulse" /> Saving...
+            </div>
+          )}
+
+          <WordCountStats chapters={chapters} activeChapterId={activeChapter} />
+
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search chapters..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+
+          <Button onClick={addChapter} className="w-full" variant="outline">
+            <Plus className="h-4 w-4 mr-2" />
+            New Chapter
+          </Button>
+
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={filteredChapters.map(ch => ch.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-1">
+                {filteredChapters.map(chapter => (
+                  <SortableChapter
+                    key={chapter.id}
+                    id={chapter.id}
+                    title={chapter.title}
+                    isActive={activeChapter === chapter.id}
+                    onClick={() => setActiveChapter(chapter.id)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </aside>
+      )}
 
       {/* Main Editor */}
       <main className="flex-1 flex flex-col">
@@ -342,17 +412,18 @@ const Index = () => {
 
           <TabsContent value="write" className="flex-1 flex flex-col mt-0">
             {/* Toolbar */}
-            <div className="glass-panel m-4 p-3 flex items-center gap-2 flex-wrap">
-              <Button
-                onClick={handleAutocomplete}
-                disabled={isAiLoading}
-                variant="default"
-                size="sm"
-                className="ai-glow"
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Continue Writing
-              </Button>
+            {!isFocusMode && (
+              <div className="glass-panel m-4 p-3 flex items-center gap-2 flex-wrap">
+                <Button
+                  onClick={handleAutocomplete}
+                  disabled={isAiLoading}
+                  variant="default"
+                  size="sm"
+                  className="ai-glow"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Continue Writing
+                </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -432,6 +503,19 @@ const Index = () => {
                   AI thinking...
                 </div>
               )}
+            </div>
+            )}
+
+            {/* Focus Mode Toggle */}
+            <div className={`${isFocusMode ? 'fixed top-4 right-4 z-10' : 'absolute top-4 right-4'}`}>
+              <Button
+                onClick={() => setIsFocusMode(!isFocusMode)}
+                variant="ghost"
+                size="icon"
+                className="glass-panel"
+              >
+                {isFocusMode ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              </Button>
             </div>
 
             {/* Editor Area */}
