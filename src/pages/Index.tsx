@@ -12,7 +12,6 @@ import {
   Wand2, 
   FileText, 
   Plus,
-  ChevronRight,
   Lightbulb,
   MessageSquare,
   ArrowLeft,
@@ -21,8 +20,11 @@ import {
   Search,
   Maximize2,
   Minimize2,
-  GripVertical,
-  Download
+  Download,
+  Users,
+  MapPin,
+  Clock,
+  History
 } from "lucide-react";
 import { ChatPanel } from "@/components/ChatPanel";
 import { EditorPanel } from "@/components/EditorPanel";
@@ -397,112 +399,121 @@ const Index = () => {
       
       {/* Sidebar */}
       {!isFocusMode && (
-        <aside className="w-64 border-r border-border bg-card p-4 space-y-4">
-          <div className="flex items-center gap-2 mb-6">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/")}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <BookOpen className="h-6 w-6 text-primary" />
-            <h1 className="text-lg font-bold truncate">{manuscript.title}</h1>
-          </div>
-
-          {saving && (
-            <div className="text-xs text-muted-foreground flex items-center gap-1 px-2">
-              <Save className="w-3 h-3 animate-pulse" /> Saving...
-            </div>
-          )}
-
-          <WordCountStats chapters={chapters} activeChapterId={activeChapter} />
-
-          {/* Export Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full">
-                <Download className="h-4 w-4 mr-2" />
-                Export
+        <aside className="w-72 border-r border-border bg-card/50 backdrop-blur-sm">
+          <div className="p-4 border-b border-border/50 space-y-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/")}
+                className="shrink-0"
+              >
+                <ArrowLeft className="w-4 h-4" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => exportToPDF(manuscript.title, chapters)}>
-                <FileText className="h-4 w-4 mr-2" />
-                Export as PDF
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => exportToDOCX(manuscript.title, chapters)}>
-                <FileText className="h-4 w-4 mr-2" />
-                Export as DOCX
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <BookOpen className="h-5 w-5 text-primary shrink-0" />
+                <h1 className="text-base font-semibold truncate">{manuscript.title}</h1>
+              </div>
+            </div>
 
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search chapters..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+            {saving && (
+              <div className="text-xs text-muted-foreground flex items-center gap-2 bg-secondary/50 rounded-md px-3 py-1.5">
+                <Save className="w-3 h-3 animate-pulse" /> 
+                <span>Auto-saving...</span>
+              </div>
+            )}
+
+            <WordCountStats chapters={chapters} activeChapterId={activeChapter} />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-popover z-50">
+                <DropdownMenuItem onClick={() => exportToPDF(manuscript.title, chapters)}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export as PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportToDOCX(manuscript.title, chapters)}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export as DOCX
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          <Button onClick={addChapter} className="w-full" variant="outline">
-            <Plus className="h-4 w-4 mr-2" />
-            New Chapter
-          </Button>
+          <div className="p-4 space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search chapters..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 bg-background/50"
+              />
+            </div>
 
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={filteredChapters.map(ch => ch.id)}
-              strategy={verticalListSortingStrategy}
+            <Button onClick={addChapter} className="w-full h-9" variant="outline">
+              <Plus className="h-4 w-4 mr-2" />
+              New Chapter
+            </Button>
+          </div>
+
+          <div className="px-4 pb-4 flex-1 overflow-y-auto">
+
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
             >
-              <div className="space-y-1">
-                {filteredChapters.map(chapter => (
-                  <SortableChapter
-                    key={chapter.id}
-                    id={chapter.id}
-                    title={chapter.title}
-                    isActive={activeChapter === chapter.id}
-                    onClick={() => setActiveChapter(chapter.id)}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+              <SortableContext
+                items={filteredChapters.map(ch => ch.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-1">
+                  {filteredChapters.map(chapter => (
+                    <SortableChapter
+                      key={chapter.id}
+                      id={chapter.id}
+                      title={chapter.title}
+                      isActive={activeChapter === chapter.id}
+                      onClick={() => setActiveChapter(chapter.id)}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
         </aside>
       )}
 
       {/* Main Editor */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col bg-background/50">
         <Tabs defaultValue="write" className="flex-1 flex flex-col">
-          <div className="glass-panel m-4 mb-0 p-2">
-            <TabsList className="grid w-full max-w-2xl grid-cols-5">
-              <TabsTrigger value="write" className="flex items-center gap-2">
+          <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm sticky top-0 z-10">
+            <TabsList className="h-12 bg-transparent border-0 p-0 mx-4">
+              <TabsTrigger value="write" className="gap-2 data-[state=active]:bg-background/80">
                 <PenTool className="h-4 w-4" />
-                Write
+                <span className="hidden sm:inline">Write</span>
               </TabsTrigger>
-              <TabsTrigger value="editor" className="flex items-center gap-2">
+              <TabsTrigger value="editor" className="gap-2 data-[state=active]:bg-background/80">
                 <BookOpen className="h-4 w-4" />
-                Editor
+                <span className="hidden sm:inline">Editor</span>
               </TabsTrigger>
-              <TabsTrigger value="characters" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Characters
+              <TabsTrigger value="characters" className="gap-2 data-[state=active]:bg-background/80">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Characters</span>
               </TabsTrigger>
-              <TabsTrigger value="locations" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Locations
+              <TabsTrigger value="locations" className="gap-2 data-[state=active]:bg-background/80">
+                <MapPin className="h-4 w-4" />
+                <span className="hidden sm:inline">Locations</span>
               </TabsTrigger>
-              <TabsTrigger value="timeline" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Timeline
+              <TabsTrigger value="timeline" className="gap-2 data-[state=active]:bg-background/80">
+                <Clock className="h-4 w-4" />
+                <span className="hidden sm:inline">Timeline</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -510,138 +521,150 @@ const Index = () => {
           <TabsContent value="write" className="flex-1 flex flex-col mt-0">
             {/* Toolbar */}
             {!isFocusMode && (
-              <div className="glass-panel m-4 p-3 flex items-center gap-2 flex-wrap">
-                <Button
-                  onClick={handleAutocomplete}
-                  disabled={isAiLoading}
-                  variant="default"
-                  size="sm"
-                  className="ai-glow"
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Continue Writing
-                </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" size="sm" disabled={isAiLoading}>
-                    <Wand2 className="h-4 w-4 mr-2" />
-                    Rewrite
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => handleRewrite('suspenseful')}>
-                    Make More Suspenseful
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleRewrite('show')}>
-                    Show, Don't Tell
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleRewrite('dialogue')}>
-                    Improve Dialogue
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="secondary" size="sm" disabled={isAiLoading}>
-                    <Lightbulb className="h-4 w-4 mr-2" />
-                    Generate Scene
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Generate Scene</DialogTitle>
-                    <DialogDescription>
-                      Describe the scene you want to create
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <Input
-                      placeholder="e.g., A rainy night in a dystopian city..."
-                      value={scenePrompt}
-                      onChange={(e) => setScenePrompt(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleGenerateScene()}
-                    />
-                    <Button 
-                      onClick={handleGenerateScene} 
+              <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm">
+                <div className="px-4 py-3 flex items-center gap-3 flex-wrap">
+                  {/* AI Tools Group */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={handleAutocomplete}
                       disabled={isAiLoading}
-                      className="w-full"
+                      variant="default"
+                      size="sm"
+                      className="ai-glow"
                     >
-                      Generate
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Continue
+                    </Button>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" disabled={isAiLoading}>
+                          <Wand2 className="h-4 w-4 mr-2" />
+                          Rewrite
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-popover z-50">
+                        <DropdownMenuItem onClick={() => handleRewrite('suspenseful')}>
+                          Make More Suspenseful
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleRewrite('show')}>
+                          Show, Don't Tell
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleRewrite('dialogue')}>
+                          Improve Dialogue
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" disabled={isAiLoading}>
+                          <Lightbulb className="h-4 w-4 mr-2" />
+                          Scene
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-background">
+                        <DialogHeader>
+                          <DialogTitle>Generate Scene</DialogTitle>
+                          <DialogDescription>
+                            Describe the scene you want to create
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <Input
+                            placeholder="e.g., A rainy night in a dystopian city..."
+                            value={scenePrompt}
+                            onChange={(e) => setScenePrompt(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleGenerateScene()}
+                          />
+                          <Button 
+                            onClick={handleGenerateScene} 
+                            disabled={isAiLoading}
+                            className="w-full"
+                          >
+                            Generate
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    <Button
+                      onClick={handleSummarize}
+                      disabled={isAiLoading}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Summarize
                     </Button>
                   </div>
-                </DialogContent>
-              </Dialog>
 
-              <Button
-                onClick={handleSummarize}
-                disabled={isAiLoading}
-                variant="secondary"
-                size="sm"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Summarize
-              </Button>
+                  <div className="h-6 w-px bg-border" />
 
-              <Button
-                onClick={saveChapterVersion}
-                variant="outline"
-                size="sm"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                Save Version
-              </Button>
+                  {/* Version & Metadata Group */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={saveChapterVersion}
+                      variant="ghost"
+                      size="sm"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Version
+                    </Button>
 
-              <VersionHistory
-                manuscriptId={manuscriptId || ""}
-                chapterId={activeChapter}
-                currentTitle={chapters.find(c => c.id === activeChapter)?.title || ""}
-                onRestore={restoreVersion}
-              />
+                    <VersionHistory
+                      manuscriptId={manuscriptId || ""}
+                      chapterId={activeChapter}
+                      currentTitle={chapters.find(c => c.id === activeChapter)?.title || ""}
+                      onRestore={restoreVersion}
+                    />
 
-              <Button
-                onClick={() => setShowMetadata(!showMetadata)}
-                variant="outline"
-                size="sm"
-              >
-                {showMetadata ? "Hide" : "Show"} Metadata
-              </Button>
+                    <Button
+                      onClick={() => setShowMetadata(!showMetadata)}
+                      variant="ghost"
+                      size="sm"
+                    >
+                      {showMetadata ? "Hide" : "Show"} Notes
+                    </Button>
+                  </div>
 
-              <Button
-                onClick={() => setIsChatOpen(true)}
-                variant="secondary"
-                size="sm"
-                className="ml-auto"
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Chat with AI
-              </Button>
-
-              {isAiLoading && (
-                <div className="ml-auto flex items-center gap-2 text-sm text-primary">
-                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                  AI thinking...
+                  {/* Right Side Actions */}
+                  <div className="ml-auto flex items-center gap-2">
+                    {isAiLoading && (
+                      <div className="flex items-center gap-2 text-sm text-primary">
+                        <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                        <span className="hidden sm:inline">AI thinking...</span>
+                      </div>
+                    )}
+                    
+                    <Button
+                      onClick={() => setIsChatOpen(true)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">Chat</span>
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
             )}
 
             {/* Focus Mode Toggle */}
-            <div className={`${isFocusMode ? 'fixed top-4 right-4 z-10' : 'absolute top-4 right-4'}`}>
+            <div className={`${isFocusMode ? 'fixed top-4 right-4 z-20' : 'absolute top-4 right-4'}`}>
               <Button
                 onClick={() => setIsFocusMode(!isFocusMode)}
                 variant="ghost"
                 size="icon"
-                className="glass-panel"
+                className="bg-card/80 backdrop-blur-sm hover:bg-card"
               >
                 {isFocusMode ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
               </Button>
             </div>
 
             {/* Editor Area */}
-            <div className="flex-1 px-4 pb-4 flex gap-4">
-              <Card className="flex-1 p-4 bg-editor-bg border-border/50">
+            <div className="flex-1 p-4 flex gap-4 overflow-hidden">
+              <Card className="flex-1 p-6 bg-editor-bg border-border/50 overflow-y-auto">
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
@@ -649,7 +672,7 @@ const Index = () => {
                 />
               </Card>
               {showMetadata && (
-                <div className="w-80">
+                <div className="w-80 shrink-0">
                   <ChapterMetadata
                     metadata={chapters.find(c => c.id === activeChapter)?.metadata || {}}
                     onChange={updateChapterMetadata}
@@ -659,24 +682,24 @@ const Index = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="editor" className="flex-1 px-4 pb-4 mt-0">
+          <TabsContent value="editor" className="flex-1 p-4 mt-0 overflow-y-auto">
             <EditorPanel chapters={chapters} />
           </TabsContent>
 
-          <TabsContent value="characters" className="flex-1 px-4 pb-4 mt-0 overflow-y-auto">
-            <Card className="p-6">
+          <TabsContent value="characters" className="flex-1 p-4 mt-0 overflow-y-auto">
+            <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
               <CharacterDatabase manuscriptId={manuscriptId || ""} />
             </Card>
           </TabsContent>
 
-          <TabsContent value="locations" className="flex-1 px-4 pb-4 mt-0 overflow-y-auto">
-            <Card className="p-6">
+          <TabsContent value="locations" className="flex-1 p-4 mt-0 overflow-y-auto">
+            <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
               <LocationDatabase manuscriptId={manuscriptId || ""} />
             </Card>
           </TabsContent>
 
-          <TabsContent value="timeline" className="flex-1 px-4 pb-4 mt-0 overflow-y-auto">
-            <Card className="p-6">
+          <TabsContent value="timeline" className="flex-1 p-4 mt-0 overflow-y-auto">
+            <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
               <Timeline manuscriptId={manuscriptId || ""} />
             </Card>
           </TabsContent>
