@@ -102,6 +102,39 @@ export type Database = {
           },
         ]
       }
+      locations: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          manuscript_id: string
+          name: string
+          notes: string | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          manuscript_id: string
+          name: string
+          notes?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          manuscript_id?: string
+          name?: string
+          notes?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       manuscripts: {
         Row: {
           content: Json | null
@@ -161,6 +194,42 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      timeline_events: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          event_date: string | null
+          event_time: string | null
+          id: string
+          manuscript_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          event_time?: string | null
+          id?: string
+          manuscript_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          event_time?: string | null
+          id?: string
+          manuscript_id?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

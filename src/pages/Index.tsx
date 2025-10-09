@@ -29,6 +29,8 @@ import { EditorPanel } from "@/components/EditorPanel";
 import { WordCountStats } from "@/components/WordCountStats";
 import { SortableChapter } from "@/components/SortableChapter";
 import { CharacterDatabase } from "@/components/CharacterDatabase";
+import { LocationDatabase } from "@/components/LocationDatabase";
+import { Timeline } from "@/components/Timeline";
 import { ChapterMetadata } from "@/components/ChapterMetadata";
 import { VersionHistory } from "@/components/VersionHistory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -481,7 +483,7 @@ const Index = () => {
       <main className="flex-1 flex flex-col">
         <Tabs defaultValue="write" className="flex-1 flex flex-col">
           <div className="glass-panel m-4 mb-0 p-2">
-            <TabsList className="grid w-full max-w-2xl grid-cols-3">
+            <TabsList className="grid w-full max-w-2xl grid-cols-5">
               <TabsTrigger value="write" className="flex items-center gap-2">
                 <PenTool className="h-4 w-4" />
                 Write
@@ -493,6 +495,14 @@ const Index = () => {
               <TabsTrigger value="characters" className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
                 Characters
+              </TabsTrigger>
+              <TabsTrigger value="locations" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Locations
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Timeline
               </TabsTrigger>
             </TabsList>
           </div>
@@ -656,6 +666,18 @@ const Index = () => {
           <TabsContent value="characters" className="flex-1 px-4 pb-4 mt-0 overflow-y-auto">
             <Card className="p-6">
               <CharacterDatabase manuscriptId={manuscriptId || ""} />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="locations" className="flex-1 px-4 pb-4 mt-0 overflow-y-auto">
+            <Card className="p-6">
+              <LocationDatabase manuscriptId={manuscriptId || ""} />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="timeline" className="flex-1 px-4 pb-4 mt-0 overflow-y-auto">
+            <Card className="p-6">
+              <Timeline manuscriptId={manuscriptId || ""} />
             </Card>
           </TabsContent>
         </Tabs>
