@@ -21,7 +21,8 @@ import {
   Search,
   Maximize2,
   Minimize2,
-  GripVertical
+  GripVertical,
+  Download
 } from "lucide-react";
 import { ChatPanel } from "@/components/ChatPanel";
 import { EditorPanel } from "@/components/EditorPanel";
@@ -63,6 +64,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { User } from "@supabase/supabase-js";
+import { exportToPDF, exportToDOCX } from "@/utils/exportUtils";
 
 interface ChapterMetadata {
   notes?: string;
@@ -413,6 +415,26 @@ const Index = () => {
           )}
 
           <WordCountStats chapters={chapters} activeChapterId={activeChapter} />
+
+          {/* Export Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuItem onClick={() => exportToPDF(manuscript.title, chapters)}>
+                <FileText className="h-4 w-4 mr-2" />
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToDOCX(manuscript.title, chapters)}>
+                <FileText className="h-4 w-4 mr-2" />
+                Export as DOCX
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Search */}
           <div className="relative">
