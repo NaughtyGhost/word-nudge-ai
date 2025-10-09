@@ -11,8 +11,11 @@ import {
   TrendingUp, 
   FileText,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  Mic,
+  Square
 } from "lucide-react";
+import { useVoiceRecording } from "@/hooks/useVoiceRecording";
 
 interface Chapter {
   id: string;
@@ -22,12 +25,17 @@ interface Chapter {
 
 interface EditorPanelProps {
   chapters: Chapter[];
+  onContentUpdate?: (chapterId: string, content: string) => void;
 }
 
-export function EditorPanel({ chapters }: EditorPanelProps) {
+export function EditorPanel({ chapters, onContentUpdate }: EditorPanelProps) {
   const [feedback, setFeedback] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [activeAnalysis, setActiveAnalysis] = useState<string | null>(null);
+  const { isRecording, isTranscribing, startRecording, stopRecording } = useVoiceRecording();
+  const [selectedChapterId, setSelectedChapterId] = useState<string | null>(
+    chapters.length > 0 ? chapters[0].id : null
+  );
 
   const getManuscriptText = () => {
     return chapters
@@ -38,6 +46,34 @@ export function EditorPanel({ chapters }: EditorPanelProps) {
         return `## ${chapter.title}\n\n${plainText}`;
       })
       .join('\n\n---\n\n');
+  };
+
+  const handleDictation = async () => {
+    if (isRecording) {
+      try {
+        const text = await stopRecording();
+        if (text && selectedChapterId && onContentUpdate) {
+          const chapter = chapters.find(c => c.id === selectedChapterId);
+          if (chapter) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = chapter.content;
+            const currentText = tempDiv.textContent || '';
+            const newContent = `<p>${currentText} ${text}</p>`;
+            onContentUpdate(selectedChapterId, newContent);
+            toast.success('Dictation added to manuscript');
+          }
+        }
+      } catch (error) {
+        console.error('Dictation error:', error);
+      }
+    } else {
+      if (!selectedChapterId) {
+        toast.error('Please select a chapter first');
+        return;
+      }
+      await startRecording();
+      toast('Recording...', { description: 'Speak now. Click stop when finished.' });
+    }
   };
 
   const analyzeManuscript = async (type: string) => {
@@ -119,6 +155,30 @@ export function EditorPanel({ chapters }: EditorPanelProps) {
           <Sparkles className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold">Editorial Assistant</h2>
         </div>
+        
+        {onContentUpdate && (
+          <div className="mb-4">
+            <Button
+              onClick={handleDictation}
+              variant={isRecording ? "destructive" : "outline"}
+              size="sm"
+              disabled={isTranscribing || chapters.length === 0}
+              className="w-full"
+            >
+              {isRecording ? (
+                <>
+                  <Square className="h-4 w-4 mr-2" />
+                  Stop Dictation
+                </>
+              ) : (
+                <>
+                  <Mic className="h-4 w-4 mr-2" />
+                  {isTranscribing ? 'Transcribing...' : 'Dictate to Current Chapter'}
+                </>
+              )}
+            </Button>
+          </div>
+        )}
         
         <p className="text-sm text-muted-foreground mb-4">
           Get professional editorial feedback on your manuscript. The AI editor will analyze all {chapters.length} chapter(s) and provide detailed insights.

@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Send, X, MessageSquare, Loader2 } from "lucide-react";
+import { Send, X, MessageSquare, Loader2, Mic, Square } from "lucide-react";
 import { toast } from "sonner";
+import { useVoiceRecording } from "@/hooks/useVoiceRecording";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -23,12 +24,30 @@ export const ChatPanel = ({ isOpen, onClose }: ChatPanelProps) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { isRecording, isTranscribing, startRecording, stopRecording } = useVoiceRecording();
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleVoiceInput = async () => {
+    if (isRecording) {
+      try {
+        const text = await stopRecording();
+        if (text) {
+          setInput(prev => (prev ? prev + ' ' + text : text));
+          toast.success('Voice input added');
+        }
+      } catch (error) {
+        console.error('Voice input error:', error);
+      }
+    } else {
+      await startRecording();
+      toast('Recording...', { description: 'Speak now. Click stop when finished.' });
+    }
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -116,6 +135,27 @@ export const ChatPanel = ({ isOpen, onClose }: ChatPanelProps) => {
 
       {/* Input */}
       <div className="p-4 border-t border-border/50">
+        <div className="flex gap-2 mb-2">
+          <Button
+            onClick={handleVoiceInput}
+            variant={isRecording ? "destructive" : "outline"}
+            size="sm"
+            disabled={isTranscribing || isLoading}
+            className="flex-1"
+          >
+            {isRecording ? (
+              <>
+                <Square className="h-4 w-4 mr-2" />
+                Stop Recording
+              </>
+            ) : (
+              <>
+                <Mic className="h-4 w-4 mr-2" />
+                {isTranscribing ? 'Transcribing...' : 'Voice Input'}
+              </>
+            )}
+          </Button>
+        </div>
         <div className="flex gap-2">
           <Input
             value={input}
