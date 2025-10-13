@@ -192,7 +192,7 @@ export function Timeline({ manuscriptId }: TimelineProps) {
                 {editingEvent ? "Edit Event" : "Add New Event"}
               </DialogTitle>
               <DialogDescription>
-                Add an important event to your story timeline.
+                Add an important event to your story timeline. This can help with plotting your story.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
