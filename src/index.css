@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Deep creative purple-blue gradient theme */
+    /* Default - Dark theme for creative writing */
     --background: 250 30% 8%;
     --foreground: 240 15% 95%;
 
@@ -74,6 +74,81 @@ All colors MUST be HSL.
     --border: 250 20% 20%;
     --input: 250 20% 18%;
     --ring: 265 80% 65%;
+
+    --editor-bg: 250 28% 10%;
+    --editor-text: 240 12% 88%;
+    --toolbar-bg: 250 25% 12% / 0.8;
+    --selection: 265 60% 45% / 0.3;
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 10%;
+
+    --card: 0 0% 98%;
+    --card-foreground: 240 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+
+    --primary: 265 80% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 10%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+
+    --accent: 45 95% 55%;
+    --accent-foreground: 240 10% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 265 80% 55%;
+
+    --editor-bg: 0 0% 100%;
+    --editor-text: 240 10% 15%;
+    --toolbar-bg: 0 0% 98% / 0.9;
+    --selection: 265 60% 55% / 0.2;
+  }
+
+  .sepia {
+    --background: 40 30% 94%;
+    --foreground: 30 15% 15%;
+
+    --card: 40 25% 96%;
+    --card-foreground: 30 15% 15%;
+
+    --popover: 40 30% 95%;
+    --popover-foreground: 30 15% 15%;
+
+    --primary: 25 65% 45%;
+    --primary-foreground: 40 30% 98%;
+
+    --secondary: 40 20% 88%;
+    --secondary-foreground: 30 15% 15%;
+
+    --muted: 40 20% 90%;
+    --muted-foreground: 30 10% 45%;
+
+    --accent: 45 80% 50%;
+    --accent-foreground: 30 15% 15%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 40 30% 98%;
+
+    --border: 40 20% 82%;
+    --input: 40 20% 88%;
+    --ring: 25 65% 45%;
+
+    --editor-bg: 40 35% 96%;
+    --editor-text: 30 20% 20%;
+    --toolbar-bg: 40 25% 94% / 0.9;
+    --selection: 25 55% 50% / 0.25;
   }
 }
 
@@ -83,16 +158,18 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 }
 
 @layer utilities {
   .editor-prose {
     @apply text-[hsl(var(--editor-text))] leading-relaxed;
-    font-family: 'Georgia', 'Merriweather', serif;
+    font-family: 'Merriweather', 'Lora', 'Georgia', serif;
     font-size: 18px;
     line-height: 1.8;
+    letter-spacing: 0.01em;
   }
 
   .editor-prose h1 {
@@ -150,5 +227,81 @@ All colors MUST be HSL.
 
   .smooth-transition {
     @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Panel animations */
+  .panel-enter {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .panel-exit {
+    animation: slideOut 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  /* AI thinking animation */
+  .ai-thinking {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* Fade animations */
+  .fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .fade-out {
+    animation: fadeOut 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(10px);
+    }
   }
 }

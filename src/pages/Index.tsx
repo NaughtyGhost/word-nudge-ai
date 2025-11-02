@@ -26,6 +26,7 @@ import {
   Clock,
   History
 } from "lucide-react";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { ChatPanel } from "@/components/ChatPanel";
 import { EditorPanel } from "@/components/EditorPanel";
 import { WordCountStats } from "@/components/WordCountStats";
@@ -399,14 +400,14 @@ const Index = () => {
       
       {/* Sidebar */}
       {!isFocusMode && (
-        <aside className="w-72 border-r border-border bg-card/50 backdrop-blur-sm">
+        <aside className="w-72 border-r border-border bg-card/50 backdrop-blur-sm smooth-transition animate-slide-in">
           <div className="p-4 border-b border-border/50 space-y-4">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate("/")}
-                className="shrink-0"
+                className="shrink-0 smooth-transition"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
@@ -414,10 +415,11 @@ const Index = () => {
                 <BookOpen className="h-5 w-5 text-primary shrink-0" />
                 <h1 className="text-base font-semibold truncate">{manuscript.title}</h1>
               </div>
+              <ThemeSwitcher />
             </div>
 
             {saving && (
-              <div className="text-xs text-muted-foreground flex items-center gap-2 bg-secondary/50 rounded-md px-3 py-1.5">
+              <div className="text-xs text-muted-foreground flex items-center gap-2 bg-secondary/50 rounded-md px-3 py-1.5 animate-fade-in">
                 <Save className="w-3 h-3 animate-pulse" /> 
                 <span>Auto-saving...</span>
               </div>
@@ -427,17 +429,17 @@ const Index = () => {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full smooth-transition">
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-popover z-50">
-                <DropdownMenuItem onClick={() => exportToPDF(manuscript.title, chapters)}>
+              <DropdownMenuContent align="start" className="w-48 bg-popover z-50 animate-scale-in">
+                <DropdownMenuItem onClick={() => exportToPDF(manuscript.title, chapters)} className="smooth-transition">
                   <FileText className="h-4 w-4 mr-2" />
                   Export as PDF
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportToDOCX(manuscript.title, chapters)}>
+                <DropdownMenuItem onClick={() => exportToDOCX(manuscript.title, chapters)} className="smooth-transition">
                   <FileText className="h-4 w-4 mr-2" />
                   Export as DOCX
                 </DropdownMenuItem>
@@ -456,7 +458,7 @@ const Index = () => {
               />
             </div>
 
-            <Button onClick={addChapter} className="w-full h-9" variant="outline">
+            <Button onClick={addChapter} className="w-full h-9 smooth-transition" variant="outline">
               <Plus className="h-4 w-4 mr-2" />
               New Chapter
             </Button>
@@ -495,23 +497,23 @@ const Index = () => {
         <Tabs defaultValue="write" className="flex-1 flex flex-col">
           <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm sticky top-0 z-10">
             <TabsList className="h-12 bg-transparent border-0 p-0 mx-4">
-              <TabsTrigger value="write" className="gap-2 data-[state=active]:bg-background/80">
+              <TabsTrigger value="write" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
                 <PenTool className="h-4 w-4" />
                 <span className="hidden sm:inline">Write</span>
               </TabsTrigger>
-              <TabsTrigger value="editor" className="gap-2 data-[state=active]:bg-background/80">
+              <TabsTrigger value="editor" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
                 <BookOpen className="h-4 w-4" />
                 <span className="hidden sm:inline">Editor</span>
               </TabsTrigger>
-              <TabsTrigger value="characters" className="gap-2 data-[state=active]:bg-background/80">
+              <TabsTrigger value="characters" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
                 <Users className="h-4 w-4" />
                 <span className="hidden sm:inline">Characters</span>
               </TabsTrigger>
-              <TabsTrigger value="locations" className="gap-2 data-[state=active]:bg-background/80">
+              <TabsTrigger value="locations" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
                 <MapPin className="h-4 w-4" />
                 <span className="hidden sm:inline">Locations</span>
               </TabsTrigger>
-              <TabsTrigger value="timeline" className="gap-2 data-[state=active]:bg-background/80">
+              <TabsTrigger value="timeline" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
                 <Clock className="h-4 w-4" />
                 <span className="hidden sm:inline">Timeline</span>
               </TabsTrigger>
@@ -530,7 +532,7 @@ const Index = () => {
                       disabled={isAiLoading}
                       variant="default"
                       size="sm"
-                      className="ai-glow"
+                      className={`ai-glow smooth-transition ${isAiLoading ? 'ai-thinking' : ''}`}
                     >
                       <Sparkles className="h-4 w-4 mr-2" />
                       Continue
@@ -538,19 +540,19 @@ const Index = () => {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" disabled={isAiLoading}>
+                        <Button variant="outline" size="sm" disabled={isAiLoading} className="smooth-transition">
                           <Wand2 className="h-4 w-4 mr-2" />
                           Rewrite
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-popover z-50">
-                        <DropdownMenuItem onClick={() => handleRewrite('suspenseful')}>
+                      <DropdownMenuContent className="bg-popover z-50 animate-scale-in">
+                        <DropdownMenuItem onClick={() => handleRewrite('suspenseful')} className="smooth-transition">
                           Make More Suspenseful
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleRewrite('show')}>
+                        <DropdownMenuItem onClick={() => handleRewrite('show')} className="smooth-transition">
                           Show, Don't Tell
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleRewrite('dialogue')}>
+                        <DropdownMenuItem onClick={() => handleRewrite('dialogue')} className="smooth-transition">
                           Improve Dialogue
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -558,12 +560,12 @@ const Index = () => {
 
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" disabled={isAiLoading}>
+                        <Button variant="outline" size="sm" disabled={isAiLoading} className="smooth-transition">
                           <Lightbulb className="h-4 w-4 mr-2" />
                           Scene
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-background">
+                      <DialogContent className="bg-background animate-scale-in">
                         <DialogHeader>
                           <DialogTitle>Generate Scene</DialogTitle>
                           <DialogDescription>
@@ -576,11 +578,12 @@ const Index = () => {
                             value={scenePrompt}
                             onChange={(e) => setScenePrompt(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleGenerateScene()}
+                            className="smooth-transition"
                           />
                           <Button 
                             onClick={handleGenerateScene} 
                             disabled={isAiLoading}
-                            className="w-full"
+                            className={`w-full smooth-transition ${isAiLoading ? 'ai-thinking' : ''}`}
                           >
                             Generate
                           </Button>
@@ -593,6 +596,7 @@ const Index = () => {
                       disabled={isAiLoading}
                       variant="outline"
                       size="sm"
+                      className="smooth-transition"
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       Summarize
@@ -607,6 +611,7 @@ const Index = () => {
                       onClick={saveChapterVersion}
                       variant="ghost"
                       size="sm"
+                      className="smooth-transition"
                     >
                       <Save className="h-4 w-4 mr-2" />
                       Save Version
@@ -623,6 +628,7 @@ const Index = () => {
                       onClick={() => setShowMetadata(!showMetadata)}
                       variant="ghost"
                       size="sm"
+                      className="smooth-transition"
                     >
                       {showMetadata ? "Hide" : "Show"} Notes
                     </Button>
@@ -631,8 +637,8 @@ const Index = () => {
                   {/* Right Side Actions */}
                   <div className="ml-auto flex items-center gap-2">
                     {isAiLoading && (
-                      <div className="flex items-center gap-2 text-sm text-primary">
-                        <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <div className="flex items-center gap-2 text-sm text-primary animate-fade-in">
+                        <div className="h-2 w-2 rounded-full bg-primary ai-thinking" />
                         <span className="hidden sm:inline">AI thinking...</span>
                       </div>
                     )}
@@ -641,6 +647,7 @@ const Index = () => {
                       onClick={() => setIsChatOpen(true)}
                       variant="outline"
                       size="sm"
+                      className="smooth-transition"
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       <span className="hidden sm:inline">Chat</span>
@@ -656,7 +663,7 @@ const Index = () => {
                 onClick={() => setIsFocusMode(!isFocusMode)}
                 variant="ghost"
                 size="icon"
-                className="bg-card/80 backdrop-blur-sm hover:bg-card"
+                className="bg-card/80 backdrop-blur-sm hover:bg-card smooth-transition"
               >
                 {isFocusMode ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
               </Button>
@@ -664,7 +671,7 @@ const Index = () => {
 
             {/* Editor Area */}
             <div className="flex-1 p-4 flex gap-4 overflow-hidden">
-              <Card className="flex-1 p-6 bg-editor-bg border-border/50 overflow-y-auto">
+              <Card className="flex-1 p-6 bg-editor-bg border-border/50 overflow-y-auto smooth-transition">
                 <RichTextEditor
                   content={content}
                   onChange={setContent}
@@ -672,7 +679,7 @@ const Index = () => {
                 />
               </Card>
               {showMetadata && (
-                <div className="w-80 shrink-0">
+                <div className="w-80 shrink-0 animate-slide-in">
                   <ChapterMetadata
                     metadata={chapters.find(c => c.id === activeChapter)?.metadata || {}}
                     onChange={updateChapterMetadata}
