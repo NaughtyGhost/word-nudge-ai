@@ -40,6 +40,22 @@ serve(async (req) => {
           systemPrompt = 'You are an experienced book editor specializing in narrative pacing and flow. Provide detailed, constructive feedback on pacing, rhythm, and reader engagement.';
           userPrompt = `Please analyze the pacing of this manuscript. Focus on:\n- Overall pacing and rhythm\n- Scene transitions\n- Tension and release\n- Reader engagement\n- Areas that feel rushed or slow\n\nManuscript:\n${text}`;
           break;
+        case 'style-consistency':
+          systemPrompt = 'You are an experienced book editor specializing in writing style and narrative voice. Provide detailed analysis of style consistency across chapters.';
+          userPrompt = `Please analyze the writing style consistency of this manuscript. Focus on:\n- Style consistency across chapters\n- Narrative voice stability\n- Prose quality and rhythm\n- Tense and perspective consistency\n- Vocabulary and language patterns\n- Areas where style shifts unexpectedly\n- Recommendations for maintaining consistent voice\n\nManuscript:\n${text}`;
+          break;
+        case 'voice-consistency':
+          systemPrompt = 'You are an experienced book editor specializing in character voice and dialogue. Analyze how consistently each character maintains their unique voice throughout the manuscript.';
+          userPrompt = `Please analyze character voice consistency in this manuscript. Focus on:\n- Each character's unique speech patterns\n- Dialogue authenticity per character\n- Voice consistency throughout chapters\n- Character-specific vocabulary and expressions\n- Areas where characters sound too similar\n- Recommendations for strengthening distinct voices\n\nManuscript:\n${text}`;
+          break;
+        case 'tone-mood':
+          systemPrompt = 'You are an experienced book editor specializing in tone, atmosphere, and emotional resonance. Analyze the emotional landscape and mood of the manuscript.';
+          userPrompt = `Please analyze the tone and mood of this manuscript. Focus on:\n- Overall tone and atmosphere\n- Mood consistency and intentional shifts\n- Emotional pacing and impact\n- Tonal appropriateness for genre\n- Areas where tone feels inconsistent\n- Suggestions for enhancing mood and atmosphere\n- Emotional highs and lows throughout the narrative\n\nManuscript:\n${text}`;
+          break;
+        case 'grammar-style':
+          systemPrompt = 'You are an experienced copy editor and style expert. Provide comprehensive grammar, punctuation, and style improvement suggestions while respecting the author\'s voice.';
+          userPrompt = `Please analyze grammar and style in this manuscript. Focus on:\n- Grammar and punctuation errors\n- Sentence structure variety\n- Word choice and precision\n- Clarity and conciseness\n- Common writing issues (passive voice, weak verbs, etc.)\n- Style improvements that maintain author's voice\n- Readability and flow\n\nProvide specific examples and actionable suggestions.\n\nManuscript:\n${text}`;
+          break;
         case 'overall':
           systemPrompt = 'You are an experienced book editor providing comprehensive editorial feedback. Provide detailed, constructive feedback covering all aspects of the manuscript.';
           userPrompt = `Please provide comprehensive editorial feedback on this manuscript. Cover:\n- Strengths and weaknesses\n- Plot and structure\n- Character development\n- Writing style and voice\n- Pacing and flow\n- Suggestions for improvement\n\nManuscript:\n${text}`;

@@ -13,7 +13,11 @@ import {
   Sparkles,
   MessageSquare,
   Mic,
-  Square
+  Square,
+  Palette,
+  MessageCircle,
+  CheckCircle2,
+  Lightbulb
 } from "lucide-react";
 import { useVoiceRecording } from "@/hooks/useVoiceRecording";
 
@@ -135,10 +139,34 @@ export function EditorPanel({ chapters, onContentUpdate }: EditorPanelProps) {
       description: 'Analyze character arcs and consistency'
     },
     {
+      type: 'style-consistency',
+      icon: Palette,
+      label: 'Style Consistency',
+      description: 'Check writing style consistency across chapters'
+    },
+    {
+      type: 'voice-consistency',
+      icon: MessageCircle,
+      label: 'Character Voice',
+      description: 'Verify character voice consistency throughout'
+    },
+    {
       type: 'pacing',
       icon: TrendingUp,
       label: 'Pacing Review',
       description: 'Evaluate narrative flow and tension'
+    },
+    {
+      type: 'tone-mood',
+      icon: Lightbulb,
+      label: 'Tone & Mood',
+      description: 'Analyze tone and suggest mood improvements'
+    },
+    {
+      type: 'grammar-style',
+      icon: CheckCircle2,
+      label: 'Grammar & Style',
+      description: 'Grammar check and style improvement suggestions'
     },
     {
       type: 'overall',
