@@ -102,6 +102,81 @@ export type Database = {
           },
         ]
       }
+      conflicts: {
+        Row: {
+          characters_involved: string[] | null
+          conflict_type: string | null
+          created_at: string
+          description: string | null
+          id: string
+          introduced_chapter: string | null
+          manuscript_id: string
+          resolved_chapter: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          characters_involved?: string[] | null
+          conflict_type?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          introduced_chapter?: string | null
+          manuscript_id: string
+          resolved_chapter?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          characters_involved?: string[] | null
+          conflict_type?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          introduced_chapter?: string | null
+          manuscript_id?: string
+          resolved_chapter?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      drafts: {
+        Row: {
+          content: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_current: boolean | null
+          manuscript_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_current?: boolean | null
+          manuscript_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_current?: boolean | null
+          manuscript_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       locations: {
         Row: {
           created_at: string
@@ -172,6 +247,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plot_points: {
+        Row: {
+          chapter_id: string
+          created_at: string
+          description: string | null
+          id: string
+          manuscript_id: string
+          plot_type: string | null
+          sequence_order: number
+          tension_level: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          manuscript_id: string
+          plot_type?: string | null
+          sequence_order?: number
+          tension_level?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          manuscript_id?: string
+          plot_type?: string | null
+          sequence_order?: number
+          tension_level?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

@@ -24,7 +24,10 @@ import {
   Users,
   MapPin,
   Clock,
-  History
+  History,
+  TrendingUp,
+  Flame,
+  FileStack
 } from "lucide-react";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { ChatPanel } from "@/components/ChatPanel";
@@ -36,6 +39,10 @@ import { LocationDatabase } from "@/components/LocationDatabase";
 import { Timeline } from "@/components/Timeline";
 import { ChapterMetadata } from "@/components/ChapterMetadata";
 import { VersionHistory } from "@/components/VersionHistory";
+import { PlotArcVisualizer } from "@/components/PlotArcVisualizer";
+import { CharacterRelationshipMap } from "@/components/CharacterRelationshipMap";
+import { ConflictTracker } from "@/components/ConflictTracker";
+import { DraftManager } from "@/components/DraftManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -365,6 +372,13 @@ const Index = () => {
     setActiveChapter(newId);
   };
 
+  const loadDraft = (draftChapters: Chapter[]) => {
+    setChapters(draftChapters);
+    if (draftChapters.length > 0) {
+      setActiveChapter(draftChapters[0].id);
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
@@ -419,9 +433,16 @@ const Index = () => {
             </div>
 
             {saving && (
-              <div className="text-xs text-muted-foreground flex items-center gap-2 bg-secondary/50 rounded-md px-3 py-1.5 animate-fade-in">
-                <Save className="w-3 h-3 animate-pulse" /> 
-                <span>Auto-saving...</span>
+              <div className="text-xs text-primary flex items-center gap-2 bg-primary/10 rounded-md px-3 py-1.5 animate-fade-in border border-primary/20">
+                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                <span className="font-medium">Auto-saving...</span>
+              </div>
+            )}
+
+            {!saving && (
+              <div className="text-xs text-muted-foreground flex items-center gap-2 bg-secondary/50 rounded-md px-3 py-1.5">
+                <Save className="w-3 h-3" /> 
+                <span>All changes saved</span>
               </div>
             )}
 
@@ -516,6 +537,22 @@ const Index = () => {
               <TabsTrigger value="timeline" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
                 <Clock className="h-4 w-4" />
                 <span className="hidden sm:inline">Timeline</span>
+              </TabsTrigger>
+              <TabsTrigger value="plot-arc" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
+                <TrendingUp className="h-4 w-4" />
+                <span className="hidden sm:inline">Plot Arc</span>
+              </TabsTrigger>
+              <TabsTrigger value="relationships" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Relationships</span>
+              </TabsTrigger>
+              <TabsTrigger value="conflicts" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
+                <Flame className="h-4 w-4" />
+                <span className="hidden sm:inline">Conflicts</span>
+              </TabsTrigger>
+              <TabsTrigger value="drafts" className="gap-2 data-[state=active]:bg-background/80 smooth-transition">
+                <FileStack className="h-4 w-4" />
+                <span className="hidden sm:inline">Drafts</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -708,6 +745,40 @@ const Index = () => {
           <TabsContent value="timeline" className="flex-1 p-4 mt-0 overflow-y-auto">
             <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
               <Timeline manuscriptId={manuscriptId || ""} />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="plot-arc" className="flex-1 p-4 mt-0 overflow-y-auto">
+            <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
+              <PlotArcVisualizer 
+                manuscriptId={manuscriptId || ""} 
+                chapters={chapters.map(ch => ({ id: ch.id, title: ch.title }))} 
+              />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="relationships" className="flex-1 p-4 mt-0 overflow-y-auto">
+            <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
+              <CharacterRelationshipMap manuscriptId={manuscriptId || ""} />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="conflicts" className="flex-1 p-4 mt-0 overflow-y-auto">
+            <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
+              <ConflictTracker 
+                manuscriptId={manuscriptId || ""} 
+                chapters={chapters.map(ch => ({ id: ch.id, title: ch.title }))} 
+              />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="drafts" className="flex-1 p-4 mt-0 overflow-y-auto">
+            <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/50">
+              <DraftManager 
+                manuscriptId={manuscriptId || ""} 
+                chapters={chapters}
+                onLoadDraft={loadDraft}
+              />
             </Card>
           </TabsContent>
         </Tabs>

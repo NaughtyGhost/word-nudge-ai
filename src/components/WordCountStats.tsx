@@ -26,10 +26,13 @@ interface WordCountStatsProps {
 
 export const WordCountStats = ({ chapters, activeChapterId }: WordCountStatsProps) => {
   const [dailyGoal, setDailyGoal] = useState(1000);
+  const [weeklyGoal, setWeeklyGoal] = useState(7000);
   const [sessionGoal, setSessionGoal] = useState(500);
   const [tempDailyGoal, setTempDailyGoal] = useState("1000");
+  const [tempWeeklyGoal, setTempWeeklyGoal] = useState("7000");
   const [tempSessionGoal, setTempSessionGoal] = useState("500");
   const [sessionStart, setSessionStart] = useState(0);
+  const [weekStart, setWeekStart] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Count words in HTML content
@@ -44,18 +47,36 @@ export const WordCountStats = ({ chapters, activeChapterId }: WordCountStatsProp
   const chapterWordCount = activeChapter ? countWords(activeChapter.content) : 0;
   const totalWordCount = chapters.reduce((sum, ch) => sum + countWords(ch.content), 0);
   const sessionWordCount = totalWordCount - sessionStart;
+  const weekWordCount = totalWordCount - weekStart;
 
   const dailyProgress = Math.min((sessionWordCount / dailyGoal) * 100, 100);
+  const weeklyProgress = Math.min((weekWordCount / weeklyGoal) * 100, 100);
   const sessionProgress = Math.min((sessionWordCount / sessionGoal) * 100, 100);
 
   useEffect(() => {
     setSessionStart(totalWordCount);
+    // Load or set weekly start from localStorage
+    const storedWeekStart = localStorage.getItem('weekStart');
+    const storedWeekDate = localStorage.getItem('weekStartDate');
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    if (storedWeekStart && storedWeekDate && new Date(storedWeekDate) > weekAgo) {
+      setWeekStart(parseInt(storedWeekStart));
+    } else {
+      // Start new week
+      setWeekStart(totalWordCount);
+      localStorage.setItem('weekStart', totalWordCount.toString());
+      localStorage.setItem('weekStartDate', now.toISOString());
+    }
   }, []);
 
   const handleSaveGoals = () => {
     const daily = parseInt(tempDailyGoal) || 1000;
+    const weekly = parseInt(tempWeeklyGoal) || 7000;
     const session = parseInt(tempSessionGoal) || 500;
     setDailyGoal(daily);
+    setWeeklyGoal(weekly);
     setSessionGoal(session);
     setIsDialogOpen(false);
   };
@@ -88,6 +109,15 @@ export const WordCountStats = ({ chapters, activeChapterId }: WordCountStatsProp
                   value={tempDailyGoal}
                   onChange={(e) => setTempDailyGoal(e.target.value)}
                   placeholder="1000"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Weekly Goal (words)</label>
+                <Input
+                  type="number"
+                  value={tempWeeklyGoal}
+                  onChange={(e) => setTempWeeklyGoal(e.target.value)}
+                  placeholder="7000"
                 />
               </div>
               <div className="space-y-2">
@@ -137,6 +167,20 @@ export const WordCountStats = ({ chapters, activeChapterId }: WordCountStatsProp
           </span>
         </div>
         <Progress value={dailyProgress} className="h-2" />
+      </div>
+
+      {/* Weekly Goal */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Target className="h-3 w-3" />
+            Weekly Goal
+          </div>
+          <span className="font-medium">
+            {weekWordCount.toLocaleString()} / {weeklyGoal.toLocaleString()}
+          </span>
+        </div>
+        <Progress value={weeklyProgress} className="h-2" />
       </div>
 
       {/* Session Goal */}
